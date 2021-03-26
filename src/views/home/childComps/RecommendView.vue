@@ -36,8 +36,7 @@ name: "RecommendView",
   flex: 1;
 }
 .recommend-item img{
-  width: 70px;
-  height: 70px;
+  width: 100%;
   margin-bottom: 10px;
 }
 </style>
