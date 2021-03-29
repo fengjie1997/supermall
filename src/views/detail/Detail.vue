@@ -2,9 +2,6 @@
   <div id="detail">
     <detail-nav-bar ref="nav" @titleClick="detailNavBarClick" class="detail-nav-bar"></detail-nav-bar>
     <scroll class="content" ref="scroll" @scroll="contentScroll">
-      <div>
-        {{ $store.state.cartList.length }}
-      </div>
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
@@ -15,6 +12,8 @@
     </scroll>
     <detail-bottom-bar @addToCart="addToCart"></detail-bottom-bar>
     <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
+
+    <toast :message="message" :show="show"></toast>
   </div>
 </template>
 
@@ -31,10 +30,12 @@ import DetailParamInfo from "./childComps/DetailParamInfo";
 import DetailCommentInfo from "./childComps/DetailCommentInfo";
 import { debounce } from "../../common/utils";
 import { itemListenerMinxin } from "../../common/mixin";
-
+import { mapActions } from 'vuex'
 import BackTop from "../../components/content/backTop/BackTop";
 
 import DetailBottomBar from "./childComps/DetailBottomBar";
+
+import Toast from "../../components/common/toast/Toast";
 export default {
   name: "Detail",
   components: {
@@ -48,7 +49,8 @@ export default {
     DetailCommentInfo,
     GoodsList,
     DetailBottomBar,
-    BackTop
+    BackTop,
+    Toast
   },
   mixins: [itemListenerMinxin],
   data() {
@@ -65,7 +67,9 @@ export default {
       itemImgListener: null,
       themeTopYs: [],
       getThemeTopY: null,
-      currentIndex: undefined
+      currentIndex: undefined,
+      message: '',
+      show: false
     }
   },
   created() {
@@ -91,13 +95,6 @@ export default {
         this.commentInfo = data.rate.list[0]
       }
       // 根据最新的数据，对应的dom渲染完成，但是存在图片未加载的情况
-      this.$nextTick(() => {
-        // this.themeTopYs.push(0)
-        // this.themeTopYs.push(this.$refs.params.$el.offsetTop)
-        // this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
-        // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
-        // console.log(this.themeTopYs)
-      })
       // 4 给getThemeY赋值
       this.getThemeTopY = debounce(() => {
         this.themeTopYs.push(0)
@@ -130,6 +127,7 @@ export default {
   //   this.$bus.$off('itemImgLoad', this.itemImgListener)
   // },
   methods: {
+    ...mapActions(['addCart']),
     imageLoad() {
       this.$refs.scroll.refresh()
 
@@ -165,11 +163,28 @@ export default {
       product.image = this.topImages[0]
       product.title = this.goods.title
       product.desc = this.goods.desc
-      product.price = this.goods.newPrice
+      product.price = this.goods.realPrice
       product.iid = this.iid
 
       // 商品添加购物车
-      this.$store.dispatch('addCart', product)
+      this.$store.dispatch('addCart', product).then(res => {
+        // console.log(res)
+        //
+        // console.log(this, this.$toast)
+        this.$toast.show(res, 1500)
+
+        // this.show = true
+        // this.message = res
+
+
+
+        // setTimeout(() => {
+        //   this.show = false,
+        //       this.message = ''
+        // }, 1500)
+      })
+
+
 
     }
   }

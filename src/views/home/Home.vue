@@ -101,7 +101,7 @@ import { getHomeMultidata, getHomeGoods } from "../../network/home";
       this.$bus.$on('itemImageLoad', () => {
         refresh()
       })
-
+      this.$refs.scroll.refresh()
     },
     destroyed() {
       console.log('home destroyed')
